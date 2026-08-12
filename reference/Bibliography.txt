@@ -1,0 +1,16 @@
+Bibliography
+Konstantinov, G. S. (2025). Network Models in Finance: Expanding the Tools for Portfolio and Risk Management. John Wiley & Sons.
+
+Lat, J. S. (2024). Managing Data Integrity for Finance: Discover practical data quality management strategies for finance analysts and data professionals. Packt Publishing Ltd.
+
+Nakamoto, S. (2008). Bitcoin: A peer-to-peer electronic cash system. 
+
+Roy, I. (2020). Blockchain Development for Finance Projects: Building Next-generation Financial Applications Using Ethereum, Hyperledger Fabric, and Stellar. Packt Publishing Ltd.
+
+Wu, Q. (2025). Variable Monetary Policy compared to the Classic Monetary Policy. In Q. Wu, The 375th Winning (p. 26). Las Vegas: Visher and Readers LLC.
+
+Wu, Q. (2026). A simple math example behind the H&S system. In Q. Wu, At Means (pp. 9-10). Las Vegas.
+
+Wu, Q. (2026). The Poll Robots; Samples of the Idea Sparking Algorithms. In Q. Wu, Idea Sparks (pp. 4-7). Las Vegas.
+
+
