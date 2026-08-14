@@ -66,5 +66,7 @@ def v_coin_init(v_coin_init_ops): #initial operations: broadcasting
 
 def outboundInfoCoder(inboundInfo):
     
-    abbrieviations = []
+    abbrieviations = {'ST#':}
     merchandise_info = []
+    
+
