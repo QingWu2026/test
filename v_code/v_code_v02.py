@@ -68,5 +68,3 @@ def outboundInfoCoder(inboundInfo):
     
     abbrieviations = {'ST#':}
     merchandise_info = []
-    
-

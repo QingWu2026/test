@@ -1,0 +1,17 @@
+{
+	{
+	"company_name": "test"
+	},
+	{
+	"company_code": "0000"
+	},
+	{
+	"company_products_list":["A", "B", "C"]	
+	},
+	{"":""},
+	{'company_info':{"company_address":"XXX"}},
+	{"company_employees":[{"id":"000"},{"name":"NNN"},{"titles":["manager", "inventor"]}]},
+	{},
+	{"company_license":"NULL"},
+	{"company_certificate":"Gold"}
+}	
