@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.5.2; Date: 8/18/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.5; Date: 8/18/2026 
 ## json encoding - 1 -  content       <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -40,9 +40,16 @@ def json_reader(file_name):
         content_tmp = get_content(line) # non-empty, no items from except_list included, etc.
         print(content_tmp)
         # check pair compositions: single pair "":"", compound pair {}:{}
-        [item_tmp, value_tmp] = get_content(content_tmp)
-        items_list.append(item_tmp)
-        values_list.append(value_tmp)
+        if(if_single(content_tmp)):
+            [item_tmp, value_tmp] = get_single_content(content_tmp)
+            items_list.append(item_tmp)
+            values_list.append(value_tmp)
+        elif(if_compound(content_tmp)):            
+            [item_list_tmp, value_list_tmp] = get_compound_content(content_tmp)
+            for item in item_list_tmp:
+                items_list.append(item)
+            for value in value_list_tmp:
+                values_list.append(value)
         
         #clear cache
         item_tmp, value_tmp = 0, 0
@@ -73,7 +80,7 @@ def get_single_content(line_in):
     item, value = line_tmp[0:split_id], line_tmp[split_id+1:len(line_in)]
     return [item, value]         
 
-def get_content(line_in):
+def get_compound_content(line_in):
     # print("read_json_line")    
     left_cn_list, right_cn_list = [], []                #{}
     left_cn_id, right_cn_id = 0, 0                #{}
@@ -96,38 +103,33 @@ def get_content(line_in):
                 #if has related content returned
     
         #preview check if left_list and right_list proper;
-        if sum(left_bn_list, right_bn_list, left_pn_list, right_pn_list): #single content detected
-            [item, value] = get_single_content(line_in)
-        else: #compound content detected
-            [item, value] = get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list)
-            
-    return [item, value]       
- 
-def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list): 
         
-        line_tmp, split_id = [], 0
-        for i in range(len(line_in)):
-                     
-            if line_in[i] == ":":
-                for j in range(len(left_cn_list)):
-                    if left_cn_list[j]: # not the first row "{"
-                        item_cmp_tmp = line_in[left_cn_list[j] : i] #suppose no compound items accroding to current test data
-
-                    if right_cn_list[j]:
-                        values_cmp_tmp.append(line_in[i : right_cn_list[j]]) #suppose values are compound
-                        if left_bn_list[j]: #detected [
-                            values_cmp_tmp.append(line_in[left_bn_list[j] : right_bn_list[j]])
-                        if left_pn_list[j]: #detected (
-                            values_cmp_tmp.append(line_in[left_pn_list[j] : right_pn_list[j]])
-                    
-                    for l in range(len(values_cmp)):
-                        if values_cmp[l] in except_list: 
-                            values_cmp.append(values_cmp[l])
-                    
+        if not sum(left_bn_list, right_bn_list, left_pn_list, right_pn_list): #compond content detected
             
-        for i in range(len(values_cmp)):
-            res_cmp[i] = [item_cmp, values_cmp[i]] #["company_products_list", "A"], ["company_products_list", "B"], ["company_products_list", "C"]
+        
+        
+        #for i in range(len(left_cn_list)):
+        
+            
+                
+                if i == len(line_in) - 1 and sum(left_cn_list) <= sum(right_cn_list): # the last line 
+                    cp_tmp = line_in[left_cn_list[left_cn_id], right_cn_list[right_cn_id]]
+                    content_cn_tmp.append(cp_tmp)                    
+                    cp_tmp = '' #cache clean
+            
+            # else:
+                # content_tmp.append(line_in[i])
+                
+                
+                # while '{' in line_in[i]:
+                    # if line_in[i+1] and '},' in line_in[i+1]:
+                        # content_tmp.append(line_in[i])
                     
+                    
+                # line_tmp.append(line_in[i])
+                # if line_in[i] == ":":
+                    # split_id = i
+    # item, value = line_tmp[0:split_id], line_tmp[split_id+1:len(line_in)]
     return content_cn_tmp  
 
 
@@ -176,7 +178,25 @@ def content_pos_pn(item_in, item_id, left_pn_id, right_pn_id, left_pn_list, righ
             # cp_tmp = ''
     return [left_pn_list, right_pn_list]#[left_pn_id, right_pn_id, left_pn_list, right_pn_list]                        
 
-   
+    
+    
+# def get_content(line_in):
+    # print("read_json_line")
+    # left_parentheses_list, right_parentheses_list = [], []    #()
+    # left_square_brace_list, right_square_brace_list = [], []  #[]
+    # opening_brace_list, closing_brace_list = [], []           #{}
+    
+    # line_tmp, split_id = [], 0
+    
+    # if line_in:
+        # for i in range(len(line_in)):
+            # if not line_in[i] in except_list and len(line_in[i]) >= 1:
+                # print(line_in[i])
+                # line_tmp.append(line_in[i])
+                # if line_in[i] == ":":
+                    # split_id = i
+    # item, value = line_tmp[0:split_id], line_tmp[split_id+1:len(line_in)]
+    # return [item, value] 
 
 """
 v0.3
