@@ -15,6 +15,17 @@ file_in = []
     
     
 """
+a = '\t"company_products_list":["A", "B", "C"]\t\n'#'\t{"":""},\n'#'\t{\n'
+b = '{'
+c = '}'
+
+print(b in a) #False#True#True
+print(c in a) #False#True#False
+
+print(len('\n')) #1
+print(len('\t\n'))#2
+print(len('\t{\n'))#3
+
 a = [0,1,2,3,4,5,":",6,7,8]
 
 def split_test(line_in): #unit test passed: QW 8/17/2026
@@ -44,4 +55,4 @@ for item in test:
     #print(item)
     if item in except_list:
         print("except_item:", item)
-"""
+    """
