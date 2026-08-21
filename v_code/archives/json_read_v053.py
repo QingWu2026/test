@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.5.4; Date: 8/20/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.5.3; Date: 8/19/2026 
 ## json encoding - 1 -  content       <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -18,71 +18,56 @@ except_list = ["{", "}", "\n", "\t", "{"":""}", "{}",  \
                '{\n', '\t{\n', '\t},\n', '\t},\n',     \
                '\t{"":""},\n', '\t{\n', '(', ')',      \
                '\t{},\n', '\t\n', '{', '}', '[', ']' ]
-               
-def string_to_char(str_in):
-    #print(str_in, "with length:", len(str_in)) #"{'company_info':{"company_address":"XXX"}},"
-    tem_list = []
-    for i in range(len(str_in)):
-        #print(i,"th",str_in[i],"with length:", len(str_in[i]))
-        for j in str_in[i]:
-            #print(j)
-            tem_list.append(j)    
-    return tem_list  
-    
-def content_pos_cn(item_in, item_id, left_cn_list, right_cn_list):     
-    #print("item_id:", item_id, "-->", item_in, "with length:",len(item_in) )
-    items_tmp = []
-    if len(item_in) > 1:
-        items_tmp = string_to_char(item_in)
-    else:
-        items_tmp = item_in
-    for i in range(len(items_tmp)):
-        # cp_tmp = '' #init cache         
-        if '{' == items_tmp[i] and len(left_cn_list) == 0: #first "{",  operation ignored
-            left_cn_list.append(i)
-            #print("Found frist {:", left_cn_list[0])
-            pass
-        elif '{' == items_tmp[i] and len(left_cn_list) >= 1:
-            #left_cn_list[left_cn_id]=(item_id)
-            left_cn_list.append(i)
-            #print("Found ", len(left_cn_list), "-th { pos at: ", item_id)
-        elif '}' in items_tmp[i]:
-            right_cn_list.append(i)
-        # print(left_cn_list)
-        # print(right_cn_list)
-    return [left_cn_list, right_cn_list]
-    
-def content_pos_bn(item_in, item_id, left_bn_list, right_bn_list):
-    items_tmp = []
-    if len(item_in) > 1:
-        items_tmp = string_to_char(item_in)
-    else:
-        items_tmp = item_in
-    for i in range(len(items_tmp)):
-        if '[' in items_tmp[i]:
-            left_bn_list.append(i)
-        elif ']' in item_in:
-            right_bn_list.append(i)   
-            
-    return [left_bn_list, right_bn_list]
-    
-def content_pos_pn(item_in, item_id, left_pn_list, right_pn_list):
-    items_tmp = []
-    if len(item_in) > 1:
-        items_tmp = string_to_char(item_in)
-    else:
-        items_tmp = item_in
-    for i in range(len(items_tmp)):                  
-        if '(' in items_tmp[i]:
-            left_pn_list.append(i)            
-        elif ')' in item_in:
-            right_pn_list.append(i)    
 
-    return [left_pn_list, right_pn_list]    
+def content_pos_cn(item_in, item_id, left_cn_id, right_cn_id, left_cn_list, right_cn_list):     
+    # cp_tmp = '' #init cache         
+    if '{' in item_in and left_cn_id == 0: #first "{",  operation ignored
+        left_cn_id = left_cn_id + 1 #sum_id ++,
+        pass
+    elif '{' in item_in and left_cn_id >= 1:    
+        left_cn_id = left_cn_id + 1
+        left_cn_list[left_cn_id] = item_id
+    elif '}' in item_in:
+        right_cn_id = right_cn_id + 1
+        right_cn_list[right_cn_id] = item_id
+    # if sum(left_cn_list) <= sum(right_cn_list) +1: #if not end, else:  sum(left_cn_list) <= sum(right_cn_list)
+            # cp_tmp = item_in[left_cn_list[left_cn_id], right_cn_list[right_cn_id]]
+            # content_cn_tmp.append(cp_tmp)                    
+            # cp_tmp = '' #cache clean
+    return [left_cn_list, right_cn_list]#[left_cn_id, right_cn_id, left_cn_list, right_cn_list]
 
+def content_pos_bn(item_in, item_id, left_bn_id, right_bn_id, left_bn_list, right_bn_list):
+    # cp_tmp = '' #init cache                    
+    elif '[' in item_in:
+        left_bn_id = left_bn_id + 1
+        left_bn_list[left_bn_id] = item_id
+    elif ']' in item_in:
+        right_bn_id = right_bn_id + 1
+        right_bn_list[right_bn_id] = item_id
+        # if sum(left_bn) == sum(right_bn):
+            # cp_tmp = item_in[left_bn_list[left_bn_id], right_bn_list[right_bn_id]]
+            # content_cn_tmp.append(cp_tmp)
+            # cp_tmp = ''
+    return [left_bn_list, right_bn_list]#[left_bn_id, right_bn_id, left_bn_list, right_bn_list]
+    
+def content_pos_pn(item_in, item_id, left_pn_id, right_pn_id, left_pn_list, right_pn_list):
+    # cp_tmp = '' #init cache                    
+    elif '(' in item_in:
+        left_pn_id = left_pn_id + 1
+        left_pn_list[left_pn_id] = item_id
+    elif ')' in item_in:
+        right_pn_id = right_pn_id + 1
+        right_pn_list[right_pn_id] = item_id
+        if sum(left_pn_id) == sum(right_pn_id):
+            cp_tmp = line_in[left_bn_list[left_pn_id], right_bn_list[right_pn_id]]
+            # content_cn_tmp.append(cp_tmp)
+            # cp_tmp = ''
+    return [left_pn_list, right_pn_list]#[left_pn_id, right_pn_id, left_pn_list, right_pn_list]    
+
+   
 def get_single_content(line_in):
-
     # print("read_json_line")
+   
     line_tmp, split_id = [], 0
     
     if line_in:
@@ -96,14 +81,13 @@ def get_single_content(line_in):
     return [item, value]         
 
 def get_content(line_in):
-
     # print("read_json_line")    
     left_cn_list, right_cn_list = [], []                #{}
-    left_cn_list_tmp, right_cn_list_tmp = [], []          
+    left_cn_id, right_cn_id = 0, 0                
     left_bn_list, right_bn_list = [], []                #[]
-    left_bn_list_tmp, right_bn_list_tmp = [], []   
+    left_bn_id, right_bn_id = 0, 0
     left_pn_list, right_pn_list = [], []                #()
-    left_pn_list_tmp, right_pn_list_tmp = [], []   
+    left_pn_id, right_pn_id = 0, 0
     content_sg_tmp, content_cn_tmp, split_id = [], [], 0
     
     # Collect cn, bn and pn positions per line, respectively
@@ -112,22 +96,21 @@ def get_content(line_in):
             if line_in[i] in except_list and len(line_in[i]) >= 1:
                 print(line_in[i])
                 
-                [left_cn_list_tmp, right_cn_list_tmp] = content_pos_cn(line_in[i], i, left_cn_list, right_cn_list)                                   
-                [left_bn_list_tmp, right_bn_list_tmp] = content_pos_bn(line_in[i], i, left_bn_list, right_bn_list)
-                [left_pn_list_tmp, right_pn_list_tmp] = content_pos_pn(line_in[i], i, left_pn_list, right_pn_list)
+                [left_cn_list, right_cn_list] = content_pos_cn(line_in[i], i, left_cn_id, right_cn_id, left_cn_list, right_cn_list)                                   
+                [left_bn_list, right_bn_list] = content_pos_bn(line_in[i], i, left_bn_id, right_bn_id, left_bn_list, right_bn_list)
+                [left_pn_list, right_pn_list] = content_pos_pn(line_in[i], i, left_pn_id, right_pn_id, left_pn_list, right_pn_list)
                 
                 #if has related content returned
     
         #preview check if left_list and right_list proper;
-        if sum(left_bn_list_tmp, right_bn_list_tmp, left_pn_list_tmp, right_pn_list_tmp): #single content detected
+        if sum(left_bn_list, right_bn_list, left_pn_list, right_pn_list): #single content detected
             [item, value] = get_single_content(line_in)
         else: #compound content detected
-            [item, value] = get_compound_content(line_in, left_cn_list_tmp, right_cn_list_tmp, left_bn_list_tmp, right_bn_list_tmp, left_pn_list_tmp, right_pn_list_tmp)
+            [item, value] = get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list)
             
     return [item, value]       
  
 def items_concact(main_item, items):
-
     items_res = []
     
     # concact items using the main item with the other items --> Sample outputs:
@@ -142,7 +125,6 @@ def items_concact(main_item, items):
     return items_res 
  
 def get_main_item(line_in, left_cn_list, left_bn_list, left_pn_list):
-
     if ":" not in line_in:
         return line_in
     left_tmp = []
@@ -158,7 +140,6 @@ def get_main_item(line_in, left_cn_list, left_bn_list, left_pn_list):
     return get_main_item(left_tmp, left_cn_list, left_bn_list, left_pn_list)
  
 def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_tmp):
-
     if ":" not in line_in:
         res_tmp.append(line_in)
         return res_tmp
@@ -175,7 +156,6 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
     return iterative_split_left(left_tmp, left_cn_list, left_bn_list, left_pn_list) 
  
 def iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, res_tmp):
-
     if ":" not in line_in:
         res_tmp.append(line_in)
         return res_tmp
@@ -191,20 +171,12 @@ def iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, 
                     right_tmp = line_in[i : right_pn_list[j]]                     
     return iterative_split_right(right_tmp, right_cn_list, right_bn_list, right_pn_list) 
  
-def get_most_left_item(items_in):
-    
-    if items_in:
-        return items_in[0]
-    else:
-        print("Error. Input Empty. Exit.")
-        return 
- 
 def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list):       
-
     items_res, left_res_tmp, right_res_tmp, = [], [], []
     
+    item_tmp = get_most_left_item()
+    
     left_tmp  = iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp)
-    item_tmp = get_most_left_item(left_tmp)
     right_tmp  = iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, right_res_tmp)
     
     items_res = items_concact(item_tmp, left_tmp)
@@ -213,7 +185,6 @@ def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, rig
 
                     
 def json_reader(file_name):
-
     json_in, items_list, values_list = [], [] , []
     with open(file_name, 'r') as f_:
         json_in = f_.readlines()
@@ -222,8 +193,8 @@ def json_reader(file_name):
             # ['{\n', '\t{\n', '\t"company_name": "test"\n', '\t},\n', '\t{\n', 
             # '\t"company_code": "0000"\n', '\t},\n', '\t{\n', '\t"company_products_list":
             # ["A", "B", "C"]\t\n', '\t},\n', '\t{"":""},\n', '\t{\'company_info\':
-            # {"company_address":"XXX"}},\n', '\t{"company_employess":[{"id":"000"},
-            # {"name":"NNN"},{"title":"manager"}]},\n', '\t{},\n', '\t\n', '}']
+            # {"company_address":"XXX"}},\n', '\t{"company_employess":[{"em_id":"000"},
+            # {"em_name":"NNN"},{"em_title":"manager"}]},\n', '\t{},\n', '\t\n', '}']
     
     item_tmp, value_tmp, content_tmp = 0, 0, 0
     item_list_tmp, value_list_tmp = [], []
@@ -231,9 +202,10 @@ def json_reader(file_name):
     for line in json_in:
         
         print(line)
-
+        content_tmp = get_compound_content(line) # non-empty, no items from except_list included, etc.
+        print(content_tmp)
         # check pair compositions: single pair "":"", compound pair {}:{}
-        [item_tmp, value_tmp] = get_content(content_tmp)
+        [item_tmp, value_tmp] = get_compound_content(content_tmp)
         items_list.append(item_tmp)
         values_list.append(value_tmp)
         
@@ -331,4 +303,4 @@ def read_json_line(line_in):
     item, value = line_tmp[0:split_id], line_tmp[split_id+1:len(line_in)]
     return [item, value]     
 """    
-                          
+                           
