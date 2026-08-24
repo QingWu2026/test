@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.5.5; Date: 8/24/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.5.4; Date: 8/20/2026 
 ## json encoding - 1 -  content       <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -53,42 +53,32 @@ def content_pos_cn(item_in, item_id, left_cn_list, right_cn_list):
     return [left_cn_list, right_cn_list]
     
 def content_pos_bn(item_in, item_id, left_bn_list, right_bn_list):
-    #print("item_id:", item_id, "-->", item_in)#, "with length:",len(item_in) )
-    items_tmp, res_flag_left, res_flag_right = [], False, False
+    items_tmp = []
     if len(item_in) > 1:
         items_tmp = string_to_char(item_in)
     else:
         items_tmp = item_in
     for i in range(len(items_tmp)):
-        if '[' == items_tmp[i]:
-            #print("==>Found '[' position at ", i, ": with item_id at", item_id)
-            left_bn_list.append(item_id)
-            res_flag_left = True
-        elif ']' == item_in:
-            #print("==>Found ']' position at ", i, ": with item_id at", item_id)
-            right_bn_list.append(item_id)   
-            res_flag_right = True
+        if '[' in items_tmp[i]:
+            left_bn_list.append(i)
+        elif ']' in item_in:
+            right_bn_list.append(i)   
             
-    return [left_bn_list, right_bn_list, res_flag_left, res_flag_right]
+    return [left_bn_list, right_bn_list]
     
 def content_pos_pn(item_in, item_id, left_pn_list, right_pn_list):
-    # print("item_id:", item_id, "-->", item_in, "with length:",len(item_in) )
-    items_tmp, res_flag_left, res_flag_right = [], False, False
+    items_tmp = []
     if len(item_in) > 1:
         items_tmp = string_to_char(item_in)
     else:
         items_tmp = item_in
     for i in range(len(items_tmp)):                  
         if '(' in items_tmp[i]:
-            print("==>Found '(' position at ", i, ": with item_id at", item_id)
-            left_pn_list.append(item_id)   
-            res_flag_left = True            
+            left_pn_list.append(i)            
         elif ')' in item_in:
-            print("==>Found ')' position at ", i, ": with item_id at", item_id)        
-            right_pn_list.append(item_id)    
-            res_flag_left = True
+            right_pn_list.append(i)    
 
-    return [left_pn_list, right_pn_list, res_flag_left, res_flag_right]   
+    return [left_pn_list, right_pn_list]    
 
 def get_single_content(line_in):
 
@@ -110,15 +100,11 @@ def get_content(line_in):
     # print("read_json_line")    
     left_cn_list, right_cn_list = [], []                #{}
     left_cn_list_tmp, right_cn_list_tmp = [], []          
-    
     left_bn_list, right_bn_list = [], []                #[]
     left_bn_list_tmp, right_bn_list_tmp = [], []   
-    left_bn_list_res, right_bn_list_res = [], [] 
-    
     left_pn_list, right_pn_list = [], []                #()
     left_pn_list_tmp, right_pn_list_tmp = [], []   
     content_sg_tmp, content_cn_tmp, split_id = [], [], 0
-    
     
     # Collect cn, bn and pn positions per line, respectively
     if line_in:
@@ -127,26 +113,16 @@ def get_content(line_in):
                 print(line_in[i])
                 
                 [left_cn_list_tmp, right_cn_list_tmp] = content_pos_cn(line_in[i], i, left_cn_list, right_cn_list)                                   
+                [left_bn_list_tmp, right_bn_list_tmp] = content_pos_bn(line_in[i], i, left_bn_list, right_bn_list)
+                [left_pn_list_tmp, right_pn_list_tmp] = content_pos_pn(line_in[i], i, left_pn_list, right_pn_list)
                 
-                res_flag_left, res_flag_right = False, False
-                [left_bn_list_tmp, right_bn_list_tmp, res_flag_left, res_flag_right] = content_pos_bn(line[i], i, left_bn_list, right_bn_list)
-
-                res_flag_left, res_flag_right = False, False
-                [left_pn_list_tmp, right_pn_list_tmp, res_flag_left, res_flag_right] = content_pos_pn(line[i], i, left_pn_list, right_pn_list)
-                    
-
-        left_bn_list_res = left_bn_list 
-        right_bn_list_res = right_bn_list
-                
-        left_pn_list_res = left_pn_list
-        right_pn_list_res = right_pn_list                
                 #if has related content returned
     
         #preview check if left_list and right_list proper;
-        if sum(left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res): #single content detected
+        if sum(left_bn_list_tmp, right_bn_list_tmp, left_pn_list_tmp, right_pn_list_tmp): #single content detected
             [item, value] = get_single_content(line_in)
         else: #compound content detected
-            [item, value] = get_compound_content(line_in, left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res)
+            [item, value] = get_compound_content(line_in, left_cn_list_tmp, right_cn_list_tmp, left_bn_list_tmp, right_bn_list_tmp, left_pn_list_tmp, right_pn_list_tmp)
             
     return [item, value]       
  
