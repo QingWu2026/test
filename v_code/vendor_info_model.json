@@ -9,12 +9,15 @@
 	"company_products_list":["A", "B", "C"]	
 	},
 	{"":""},
-	{'company_info':{"company_address":"XXX"}},
+	{"company_info":{"company_address":"XXX"}},
 	{"company_employees":[{"id":"000"},{"name":"NNN"},{"titles":["manager", "inventor"]}]},
 	{},
 	{"company_license":"NULL"},
 	{"company_certificate":"Gold"},
 	{
 	 "company_discounts":[{"manager_authorities":(0.1, 0.2, 0.3)}, {"sales_authorities":(0.1, 0.2)}, {"group_discounts":(0.1, 0.15)}]	
+	}
+	{
+	"company_contact":{{"company_manager":"Bob"}, {"company_sales":"Alice"}}	
 	}
 }	
