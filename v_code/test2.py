@@ -96,7 +96,7 @@ def save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_li
     
 def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_tmp, iter_split_left_idx):
     
-    # print("Iterate_left_item length:==>",len(line_in))
+    print("Iterate_left_item length:==>",len(line_in))
 
     if ":" not in line_in and iter_split_left_idx == 0: #a line but no contents
         return res_tmp
@@ -110,13 +110,13 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
     for i in range(len(line_in)):                
         if line_in[i] == ":":  
             iter_split_left_idx = iter_split_left_idx + 1
-            #print("incoming saved results of positions for {", left_cn_list)
-            if len(left_cn_list) < 1 or len(left_cn_list[0]) == 0:
+            print("incoming saved results of positions for {", left_cn_list)
+            if len(left_cn_list) < 1: #no '{' found in results' folder #or len(left_cn_list[0]) == 0:
                 break
-            for j in range(len(left_cn_list)):
+            for j in range(len(left_cn_list)):#
             
                 # {
-                if len(left_cn_list[j])>=1:
+                if len(left_cn_list[j])>=1: #in case [[0]]
                     #print(left_cn_list[j])
                     tmp_left = left_cn_list[j][0]
                 else: 
@@ -124,9 +124,11 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
                 #print("==>left_cn_list[j]:",tmp_left)#, "i:", i) #fix-1, new saving results form updated
                 if tmp_left: # detected "{"
                     left_tmp = line_in[tmp_left+1 : i]     
-                    # print(iter_split_left_idx,"-th iterative split '{' pos:==>", left_tmp)
+                    #left_residue = line_in[i+1:len(line_in)]
+                    print(iter_split_left_idx,"-th iterative split '{' pos:==>", left_tmp)
                     res_tmp.append(left_tmp)
-                    pass
+                    print(">> res_tmp:", res_tmp)
+                    #pass
                 # if len(left_bn_list[j])>=1:# [
                     # print(left_bn_list[j])
                     # tmp_left = left_bn_list[j][0]
@@ -213,7 +215,7 @@ def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, rig
     return [items_res, right_tmp]    
     
 file_root = r"M:\Work_Schedules\Company_Projects\test\v_code/"
-json_name = "test.json"#"vendor_info_model.json"
+json_name = "test.json"#"vendor_info_model.json"#
 file_name = file_root + json_name
 # print(json_name)
 
@@ -261,8 +263,9 @@ for j in range(len(json_in)):
         [left_pn_list, right_pn_list] = content_pos_pn(line_in[i], i, left_pn_list_tmp, right_pn_list_tmp)                                   
         left_pn_list_res.append(left_pn_list)
         right_pn_list_res.append(right_pn_list)
-        left_pn_list, right_pn_list = [], [] 
+        left_pn_list, right_pn_list = [], []        
         
-        #save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list)
-            
-    [item, value] = get_compound_content(line_in, left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res)
+        if i == len(line_in)-1:
+            [item, value] = get_compound_content(line_in, left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res)
+            left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res =[],[],[],[],[],[]
+    # save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list)

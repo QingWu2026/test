@@ -1,3 +1,6 @@
 {
+	{
+	"company_name": "test"
+	},	
 	{"company_info":{"company_address":"XXX"}}
 }
