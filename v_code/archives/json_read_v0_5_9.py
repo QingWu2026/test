@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.6; Date: 9/1/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.5.9; Date: 8/31/2026 
 ## json encoding - 1 -  content      <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -90,31 +90,17 @@ def content_pos_pn(item_in, item_id, left_pn_list, right_pn_list):
 
 def get_single_content(line_in):
 
-    # print("get_single_content")
-    line_tmp, split_id, split_idx, item, value = "", 0, 0, "", "" # line_tmp, split_id = [], 0
+    # print("read_json_line")
+    line_tmp, split_id = [], 0
     
     if line_in:
         for i in range(len(line_in)):
             if not line_in[i] in except_list and len(line_in[i]) >= 1:
-                # print(line_in[i])
-                line_tmp = line_tmp + str(line_in[i])
-                # print(line_tmp)
+                print(line_in[i])
+                line_tmp.append(line_in[i])
                 if line_in[i] == ":":
-                    split_idx = split_idx + 1
                     split_id = i
-                    # print("--> split_id:", split_id)
-    if split_idx > 1:
-        # print("-->split_idx",split_idx)
-        # print("Return null item:", item)
-        # print("Return null value:", value)        
-        return [item, value]
-    else:
-        # print(line_in[0:split_id],"vs",line_tmp[0:split_id])
-        item = line_tmp[0:split_id]
-        value = line_tmp[split_id+1:len(line_in)]
-    # print("item:", item)
-    # print("value:", value)
-        
+    item, value = line_tmp[0:split_id], line_tmp[split_id+1:len(line_in)]
     return [item, value]    
     
 def items_concact(main_item, item):
@@ -127,7 +113,7 @@ def items_concact(main_item, item):
    
     return  str(main_item) + "." + str(item)   
 
-def concat_compound_items(items_in):
+def get_compound_items(items_in):
     
     if len(items_in) == 0:
         # print("Item name error: Input as empty. Exit. >>>")
@@ -150,39 +136,29 @@ def concat_compound_items(items_in):
     
     # compound_items = items_concact(most_left_item, least_left_items)            
         
-    return compound_items 
+    return compound_items  
 
 def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list):       
 
-    item_res, value_res, left_res_tmp, right_res_tmp, right_tmp, item_tmp, value_tmp = [], [], [], [], [], "", ""
+    items_res, left_res_tmp, right_res_tmp, right_tmp = [], [], [], []
     iter_split_left_idx = 0
+    left_tmp  = iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx) 
     
-    #print(">>>get_compound_content-->line_in:",line_in)
-    [item_tmp, value_tmp] = get_single_content(line_in)
-
-    # print(">>>get_single_content-->item:", item_tmp)
-    # print(">>>get_single_content-->value:", value_tmp)    
-
-    left_tmp  = iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)     
-    # print(">>>get_compound_content:", left_tmp) #somehow it dupilcated over than wanted
+    # print(left_tmp) #somehow it dupilcated over than wanted
     
-    items_tmp = concat_compound_items(left_tmp)
+    item_tmp = get_compound_items(left_tmp)
     # left_tmp = []
-    # print(">>> Get compound items:", items_tmp)
-    if items_tmp: #filtered None situations (i.e. for "{" only line)
-        item_res = items_tmp
-    elif item_tmp:
-        item_res = item_tmp   
-        
-    # right_tmp  = iterative_split_right(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)    
-    if items_tmp: #filtered None situations (i.e. for "{" only line)
-        value_res = right_tmp
-    elif item_tmp:
-        value_res = value_tmp     
-
-    print(">>> Output the items:", item_res, ">>>")
+    print(">>> Get compound items:", item_tmp)
+    # if item_tmp: #filtered None situations (i.e. for "{" only line)
+        # items_res = items_concact(item_tmp, left_tmp)
     
-    return [item_res, value_res]     
+    
+    # right_tmp  = iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, right_res_tmp) #least right
+    
+    
+    #print(">>> Output the items:", items_res)
+    
+    return [items_res, right_tmp]      
       
 def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_tmp, iter_split_left_idx):
     
@@ -306,39 +282,39 @@ def get_content(line_in):
     left_cn_list_res, right_cn_list_res = [], []                #{}    
     left_bn_list_res, right_bn_list_res = [], []                #[]     
     left_pn_list_res, right_pn_list_res = [], []                #()
-    item, value = [],[]
-    # content_sg_tmp, content_cn_tmp, split_id = [], [], 0
+ 
+ content_sg_tmp, content_cn_tmp, split_id = [], [], 0
     
     
     # Collect cn, bn and pn positions per line, respectively
-    if  not line_in:
-        return [item, value]
-    for i in range(0, len(line_in)):
-        # print(">>> ", i, "-th Loop searching in line_in: ", line_in[i], ">>>")
-        left_cn_list_tmp, right_cn_list_tmp = [], []       
-        [left_cn_list, right_cn_list] = content_pos_cn(line_in[i], i, left_cn_list_tmp, right_cn_list_tmp)                                   
-        left_cn_list_res.append(left_cn_list)
-        right_cn_list_res.append(right_cn_list)
-        left_cn_list, right_cn_list = [], []
-        # print(">>> left_cn_list_res ===>", left_cn_list_res)
+    if line_in:
+        for i in range(len(line_in)):
+            if line_in[i] in except_list and len(line_in[i]) >= 1:#test point-1: effective zone
+                print(line_in[i])
+                
+                left_cn_list_tmp, right_cn_list_tmp = [], []       
+                [left_cn_list, right_cn_list] = content_pos_cn(line_in[i], i, left_cn_list_tmp, right_cn_list_tmp)                                   
+                left_cn_list_res.append(left_cn_list)
+                right_cn_list_res.append(right_cn_list)
+                left_cn_list, right_cn_list = [], []
 
-        left_bn_list_tmp, right_bn_list_tmp = [], []       
-        [left_bn_list, right_bn_list] = content_pos_bn(line_in[i], i, left_bn_list_tmp, right_bn_list_tmp)                                   
-        left_bn_list_res.append(left_bn_list)
-        right_bn_list_res.append(right_bn_list)
-        left_bn_list, right_bn_list = [], []
+                left_bn_list_tmp, right_bn_list_tmp = [], []       
+                [left_bn_list, right_bn_list] = content_pos_bn(line_in[i], i, left_bn_list_tmp, right_bn_list_tmp)                                   
+                left_bn_list_res.append(left_bn_list)
+                right_bn_list_res.append(right_bn_list)
+                left_bn_list, right_bn_list = [], []
 
-        left_pn_list_tmp, right_pn_list_tmp = [], []       
-        [left_pn_list, right_pn_list] = content_pos_pn(line_in[i], i, left_pn_list_tmp, right_pn_list_tmp)                                   
-        left_pn_list_res.append(left_pn_list)
-        right_pn_list_res.append(right_pn_list)
-        left_pn_list, right_pn_list = [], []        
-        
-        if i == len(line_in)-1:
-            [item, value] = get_compound_content(line_in, left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res)
-            
-            left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res =[],[],[],[],[],[]
-    # save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list)   
+                left_pn_list_tmp, right_pn_list_tmp = [], []       
+                [left_pn_list, right_pn_list] = content_pos_pn(line_in[i], i, left_pn_list_tmp, right_pn_list_tmp)                                   
+                left_pn_list_res.append(left_pn_list)
+                right_pn_list_res.append(right_pn_list)
+                left_pn_list, right_pn_list = [], []             
+                      
+            if i == len(line_in)-1:
+                [item, value] = get_compound_content(line_in, left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res)
+                left_cn_list_res, right_cn_list_res, left_bn_list_res, right_bn_list_res, left_pn_list_res, right_pn_list_res =[],[],[],[],[],[]
+
+        # save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list)    
     
     return [item, value]       
                     
