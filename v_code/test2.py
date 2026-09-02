@@ -195,7 +195,7 @@ def get_single_content(line_in):
         return [item, value]
     else:
         # print(line_in[0:split_id],"vs",line_tmp[0:split_id])
-        item = line_tmp[0:split_id]
+        item = line_tmp[0:split_id-1]
         value = line_tmp[split_id+1:len(line_in)]
     # print("item:", item)
     # print("value:", value)
@@ -212,7 +212,7 @@ def concat_compound_items(items_in):
         return items_in #detect single item
     elif not ":" in items_in[0]: #multiple items in
         most_left_item = items_in[0]  
-        print(">>>Processing compound items:", items_in)
+        # print(">>>Processing compound items:", items_in)
     # print("The most left item is:", most_left_item)
     
     compound_items = []

@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.6.1; Date: 9/2/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.6; Date: 9/1/2026 
 ## json encoding - 1 -  content      <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -46,7 +46,7 @@ def content_pos_cn(item_in, item_id, left_cn_list, right_cn_list):
             #print(items_tmp[i])
             #print("==>Found '{' position at ", i, ": with item_id at", item_id)
             left_cn_list.append(item_id)
-        elif '}' == items_tmp[i]:
+        elif '}' in items_tmp[i]:
             #print("==>Found '}' position at ", i, ": with item_id at", item_id)
             right_cn_list.append(item_id)
     # print("Print Results of { found:", left_cn_list)
@@ -72,17 +72,17 @@ def content_pos_bn(item_in, item_id, left_bn_list, right_bn_list):
     return [left_bn_list, right_bn_list]
     
 def content_pos_pn(item_in, item_id, left_pn_list, right_pn_list):
-    # print("item_id:", item_id, "-->", item_in, "with length:",len(item_in) )
+    print("item_id:", item_id, "-->", item_in, "with length:",len(item_in) )
     items_tmp = []
     if len(item_in) > 1:
         items_tmp = string_to_char(item_in)
     else:
         items_tmp = item_in
     for i in range(len(items_tmp)):                  
-        if '(' == items_tmp[i]:
+        if '(' in items_tmp[i]:
             #print("==>Found '(' position at ", i, ": with item_id at", item_id)
             left_pn_list.append(item_id)   
-        elif ')' == item_in:
+        elif ')' in item_in:
             #print("==>Found ')' position at ", i, ": with item_id at", item_id)        
             right_pn_list.append(item_id)    
 
@@ -110,7 +110,7 @@ def get_single_content(line_in):
         return [item, value]
     else:
         # print(line_in[0:split_id],"vs",line_tmp[0:split_id])
-        item = line_tmp[0:split_id-1]
+        item = line_tmp[0:split_id]
         value = line_tmp[split_id+1:len(line_in)]
     # print("item:", item)
     # print("value:", value)
@@ -137,7 +137,7 @@ def concat_compound_items(items_in):
         return items_in #detect single item
     elif not ":" in items_in[0]: #multiple items in
         most_left_item = items_in[0]  
-        # print(">>>Processing compound items:", items_in)
+        print(">>>Processing compound items:", items_in)
     # print("The most left item is:", most_left_item)
     
     compound_items = []
@@ -198,7 +198,7 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
     for i in range(len(line_in)):                
         if line_in[i] == ":":  
             iter_split_left_idx = iter_split_left_idx + 1
-            # print("incoming saved results of positions for {", left_cn_list)
+            print("incoming saved results of positions for {", left_cn_list)
             if len(left_cn_list) < 1: #no '{' found in results' folder #or len(left_cn_list[0]) == 0:
                 break
             for j in range(len(left_cn_list)):#
@@ -213,9 +213,9 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
                 if tmp_left: # detected "{"
                     left_tmp = line_in[tmp_left+1 : i]     
                     #left_residue = line_in[i+1:len(line_in)]
-                    # print(iter_split_left_idx,"-th iterative split '{' pos:==>", left_tmp)
+                    print(iter_split_left_idx,"-th iterative split '{' pos:==>", left_tmp)
                     res_tmp.append(left_tmp)
-                    # print(">> res_tmp:", res_tmp)
+                    print(">> res_tmp:", res_tmp)
                     #pass
                 # if len(left_bn_list[j])>=1:# [
                     # print(left_bn_list[j])
@@ -265,35 +265,12 @@ def iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, 
 
 def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list):       
 
-    item_res, value_res, left_res_tmp, right_res_tmp, right_tmp, item_tmp, value_tmp = [], [], [], [], [], "", ""
+    items_res, left_res_tmp, right_res_tmp, = [], [], []
     iter_split_left_idx = 0
-    
-    #print(">>>get_compound_content-->line_in:",line_in)
-    [item_tmp, value_tmp] = get_single_content(line_in)
-
-    # print(">>>get_single_content-->item:", item_tmp)
-    # print(">>>get_single_content-->value:", value_tmp)    
-
-    left_tmp  = iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)     
-    # print(">>>get_compound_content:", left_tmp) #somehow it dupilcated over than wanted
-    
-    items_tmp = concat_compound_items(left_tmp)
-    # left_tmp = []
-    # print(">>> Get compound items:", items_tmp)
-    if items_tmp: #filtered None situations (i.e. for "{" only line)
-        item_res = items_tmp
-    elif item_tmp:
-        item_res = item_tmp   
-        
-    # right_tmp  = iterative_split_right(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)    
-    if items_tmp: #filtered None situations (i.e. for "{" only line)
-        value_res = right_tmp
-    elif item_tmp:
-        value_res = value_tmp     
-
-    # print(">>> Output the items:", item_res, ">>>")
-    
-    return [item_res, value_res]       
+    left_tmp  = iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx) 
+    item_tmp = get_compound_items(left_tmp)
+       
+    return [items_res, right_tmp]      
 
 def save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list):
     from datetime import datetime as d_t    
@@ -325,7 +302,7 @@ def save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_li
 
 def get_content(line_in):
 
-    # print(">>>Json_Reader:", line_in)    
+    # print("read_json_line")    
     left_cn_list_res, right_cn_list_res = [], []                #{}    
     left_bn_list_res, right_bn_list_res = [], []                #[]     
     left_pn_list_res, right_pn_list_res = [], []                #()
@@ -364,23 +341,8 @@ def get_content(line_in):
     # save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list)   
     
     return [item, value]       
-
-def items_print(items_list):
-    print(">>> Items are:", items_list)
-    
-def values_print(values_list):
-    print(">>> Values are:", values_list)
-    
-def content_dict_print(content_dict_list):
-    item_tmp, value_tmp = "","" 
-    for i in range(len(content_dict_list)):
-        [item_tmp, value_tmp] = content_dict_list[i]
-        print(">>> Content Dictionary is:","[", item_tmp, ":",  value_tmp, "]")
-        item_tmp, value_tmp = "",""        
-                 
+                    
 def json_reader(file_name):
-
-    print(">>> Applying Json_Reader:")
 
     json_in, items_list, values_list = [], [] , []
     with open(file_name, 'r') as f_:
@@ -395,37 +357,26 @@ def json_reader(file_name):
     
     item_tmp, value_tmp, content_tmp = 0, 0, 0
     item_list_tmp, value_list_tmp = [], []
-    content_dict_id = 0
-    content_dict = []
     
     for line in json_in:
         
-        # print(line)
+        print(line)
 
         # check pair compositions: single pair "":"", compound pair {}:{}
-        [item_tmp, value_tmp] = get_content(line)
-        # print("item_tmp", item_tmp)
-        # print("value_tmp", value_tmp)
-        if item_tmp and len(item_tmp)>=1:
-            items_list.append(item_tmp)
-        if value_tmp and len(value_tmp)>=1:
-            values_list.append(value_tmp)
-        
-        if  item_tmp and len(item_tmp)>=1 and value_tmp and len(value_tmp)>=1:
-            content_dict.append([item_tmp, value_tmp])
-            print(content_dict)
-            content_dict_id = content_dict_id + 1
+        [item_tmp, value_tmp] = get_content(content_tmp)
+        items_list.append(item_tmp)
+        values_list.append(value_tmp)
         
         #clear cache
         item_tmp, value_tmp = 0, 0
+        item_list_tmp, value_list_tmp = [], []
     
-    items_print(items_list)
-    values_print(values_list)
-    content_dict_print(content_dict)
+    # def items_print():
+        # print(items_list)
+    # def values_print():
+        # print(values_list)
+    # def content_dict_print():
+        # for i in range(len(items_list)):
+            # print("(", items_list[i], ")", ":", "(", values_list[i], ")")
             
     return [items_list, values_list]                          
-    
-file_root = r"M:\Work_Schedules\Company_Projects\test\v_code/"
-json_name = "test.json"#"vendor_info_model.json"#
-file_name = file_root + json_name
-[items_list, values_list]= json_reader(file_name)
