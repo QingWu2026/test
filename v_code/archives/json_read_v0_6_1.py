@@ -1,4 +1,4 @@
-## Json_Reader: python; Author: Qing Wu; Version: v0.6.2; Date: 9/3/2026 
+## Json_Reader: python; Author: Qing Wu; Version: v0.6.1; Date: 9/2/2026 
 ## json encoding - 1 -  content      <==>  "company_name": "test"
 ## json decoding - - -  single_cnt   <==>  item_01: "company_name"; value_01: "test"
 ## json encoding - 2 -  compound_cnt <==>  "company_products_list":["A", "B", "C"]
@@ -155,8 +155,7 @@ def concat_compound_items(items_in):
 def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list):       
 
     item_res, value_res, left_res_tmp, right_res_tmp, right_tmp, item_tmp, value_tmp = [], [], [], [], [], "", ""
-    iter_split_left_idx, iter_split_right_idx = 0, 0
-    left_tmp, right_tmp = [], []
+    iter_split_left_idx = 0
     
     #print(">>>get_compound_content-->line_in:",line_in)
     [item_tmp, value_tmp] = get_single_content(line_in)
@@ -168,23 +167,22 @@ def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, rig
     # print(">>>get_compound_content:", left_tmp) #somehow it dupilcated over than wanted
     
     items_tmp = concat_compound_items(left_tmp)
-    # 
+    # left_tmp = []
     # print(">>> Get compound items:", items_tmp)
     if items_tmp: #filtered None situations (i.e. for "{" only line)
         item_res = items_tmp
     elif item_tmp:
         item_res = item_tmp   
         
-    right_tmp  = iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, right_res_tmp, iter_split_right_idx)    
+    # right_tmp  = iterative_split_right(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)    
     if items_tmp: #filtered None situations (i.e. for "{" only line)
         value_res = right_tmp
     elif item_tmp:
         value_res = value_tmp     
 
-    # print(">>> Output the items:", item_res, ">>>")
-    # print(">>> Output the values:", right_tmp, ">>>")    
+    print(">>> Output the items:", item_res, ">>>")
     
-    return [item_res, value_res]      
+    return [item_res, value_res]     
       
 def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_tmp, iter_split_left_idx):
     
@@ -214,6 +212,7 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
                 #print("==>left_cn_list[j]:",tmp_left)#, "i:", i) #fix-1, new saving results form updated
                 if tmp_left: # detected "{"
                     left_tmp = line_in[tmp_left+1 : i]     
+                    #left_residue = line_in[i+1:len(line_in)]
                     # print(iter_split_left_idx,"-th iterative split '{' pos:==>", left_tmp)
                     res_tmp.append(left_tmp)
                     # print(">> res_tmp:", res_tmp)
@@ -246,70 +245,28 @@ def iterative_split_left(line_in, left_cn_list, left_bn_list, left_pn_list, res_
     
     return iterative_split_left(left_tmp, left_cn_list, left_bn_list, left_pn_list, res_tmp, iter_split_left_idx) 
 
-def iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, res_tmp, iter_split_right_idx):
-    
-    # print("Iterate_left_item length:==>",len(line_in))
+ 
+def iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, res_tmp):
 
-    if ":" not in line_in and iter_split_right_idx == 0: #a line but no contents
+    if ":" not in line_in:
+        res_tmp.append(line_in)
         return res_tmp
-
-    if ":" not in line_in and iter_split_right_idx >= 1: #contents after several iterative splits 
-        # res_tmp.append(line_in)
-        #print(">>> Output the split left item:", res_tmp) 
-        return res_tmp
-        
     right_tmp = []
     for i in range(len(line_in)):                
-        if line_in[i] == ":":  
-            iter_split_right_idx = iter_split_right_idx + 1
-            # print("incoming saved results of positions for {", left_cn_list)
-            if len(right_cn_list) < 1: #no '}' found in results' folder #or len(right_cn_list[0]) == 0:
-                break
-            for j in range(len(right_cn_list)):#            
-                # {
-                if len(right_cn_list[j])>=1: #in case [[0]]
-                    #print(left_cn_list[j])
-                    tmp_right = right_cn_list[j][0]
-                else: 
-                    tmp_right = right_cn_list[j]
-                #print("==>left_cn_list[j]:",tmp_left)#, "i:", i) #fix-1, new saving results form updated
-                if tmp_right: # detected "{"
-                    right_tmp = line_in[i+1 : tmp_right]     
-                    # print(">> right_tmp:", right_tmp)                    
-                    if not ":" in right_tmp:
-                        return right_tmp
-                    res_tmp.append(right_tmp)
-                    #pass
-                # if len(left_bn_list[j])>=1:# [
-                    # print(left_bn_list[j])
-                    # tmp_left = left_bn_list[j][0]
-                # else: 
-                    # tmp_left = left_bn_list[j]
-
-                # if tmp_left: # detected "["
-                    # left_tmp = line_in[tmp_left : i] 
-                    #print("split '[' pos:", left_tmp)
-                    # res_tmp.append(left_tmp)
-                            
-                # if len(left_pn_list[j])>=1:# (
-                    # print(left_pn_list[j])
-                    # tmp_left = left_pn_list[j][0]
-                # else: 
-                    # tmp_left = left_pn_list[j]                    
-                    
-                    
-                # if tmp_left: # detected "("
-                    # left_tmp = line_in[tmp_left : i] 
-                    #print("split '(' pos:", left_tmp)
-                    # res_tmp.append(left_tmp)
-            
-    return iterative_split_right(right_tmp, right_cn_list, right_bn_list, right_pn_list, res_tmp, iter_split_right_idx)  
+        if line_in[i] == ":":
+            for j in range(len(right_cn_list)):
+                if right_cn_list[j]: #  detected "}"
+                    right_tmp = line_in[i : right_cn_list[j]]    
+                if right_bn_list[j]: #  detected "]"
+                    right_tmp = line_in[i : right_bn_list[j]] 
+                if right_pn_list[j]: #  detected ")"
+                    right_tmp = line_in[i : right_pn_list[j]]                     
+    return iterative_split_right(right_tmp, right_cn_list, right_bn_list, right_pn_list)
 
 def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, right_bn_list, left_pn_list, right_pn_list):       
 
     item_res, value_res, left_res_tmp, right_res_tmp, right_tmp, item_tmp, value_tmp = [], [], [], [], [], "", ""
-    iter_split_left_idx, iter_split_right_idx = 0, 0
-    left_tmp, right_tmp = [], []
+    iter_split_left_idx = 0
     
     #print(">>>get_compound_content-->line_in:",line_in)
     [item_tmp, value_tmp] = get_single_content(line_in)
@@ -321,23 +278,22 @@ def get_compound_content(line_in, left_cn_list, right_cn_list, left_bn_list, rig
     # print(">>>get_compound_content:", left_tmp) #somehow it dupilcated over than wanted
     
     items_tmp = concat_compound_items(left_tmp)
-    # 
+    # left_tmp = []
     # print(">>> Get compound items:", items_tmp)
     if items_tmp: #filtered None situations (i.e. for "{" only line)
         item_res = items_tmp
     elif item_tmp:
         item_res = item_tmp   
         
-    right_tmp  = iterative_split_right(line_in, right_cn_list, right_bn_list, right_pn_list, right_res_tmp, iter_split_right_idx)    
+    # right_tmp  = iterative_split_right(line_in, left_cn_list, left_bn_list, left_pn_list, left_res_tmp, iter_split_left_idx)    
     if items_tmp: #filtered None situations (i.e. for "{" only line)
         value_res = right_tmp
     elif item_tmp:
         value_res = value_tmp     
 
     # print(">>> Output the items:", item_res, ">>>")
-    # print(">>> Output the values:", right_tmp, ">>>")    
     
-    return [item_res, value_res]        
+    return [item_res, value_res]       
 
 def save_results(left_cn_list_res,right_cn_list_res,left_bn_list_res,right_bn_list_res,left_pn_list_res,right_pn_list):
     from datetime import datetime as d_t    
@@ -463,8 +419,8 @@ def json_reader(file_name):
         #clear cache
         item_tmp, value_tmp = 0, 0
     
-    # items_print(items_list)
-    # values_print(values_list)
+    items_print(items_list)
+    values_print(values_list)
     content_dict_print(content_dict)
             
     return [items_list, values_list]                          
